@@ -1,0 +1,14 @@
+1b9d2a011541106f2c7e65f69f5ed3a0 *DESCRIPTION
+13aba87ff91ae31c4fb6f36299199e2e *NAMESPACE
+7df3a38123fe31d099e09cb92337b871 *R/qardl.R
+3e5b7beb7098b7da3aa7d85e338cf8d7 *R/summary.ardl.R
+77e57b42f4927f10a43999a104c8d6cf *R/zzz.R
+de0b1fc8b822784301ca9a0891755a00 *data/exampledata.rda
+b3573132df6750e4b3c3080aaff8bb51 *man/exampledata.Rd
+4476821c33ebd3d13cc2fe125c1830e3 *man/lagm.Rd
+7d64346455bf41be103baf8ba8e45e1a *man/lags.Rd
+96d36379ee32b4436ea4512c8da1809a *man/mlags.Rd
+42d4fcad7ff65f04ce68f8fd927c33fd *man/nlagm.Rd
+ef70b5a9a95c1dabe89320e43b0b1b16 *man/nlagm1.Rd
+99d4d13c6a4cf03c2660041044c50bb2 *man/qardl.Rd
+764f544631b0bee90e6ac8a92c2b5501 *man/summary.qardl.Rd
