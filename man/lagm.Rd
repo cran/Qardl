@@ -2,24 +2,21 @@
 % Please edit documentation in R/zzz.R
 \name{lagm}
 \alias{lagm}
-\title{Function lagm which return a lagged matrix}
+\title{Function lagm: lagged matrix}
 \usage{
 lagm(m, nLags)
 }
 \arguments{
-\item{m}{is a matrix}
+\item{nLags}{the number of lags
 
-\item{nLags}{the number of lags}
-}
-\value{
-A lagged matrix
+#load data
+data(exampledata)
+m=as.matrix(exampledata$y)
+lagm(m,2)}
+
+\item{x}{is a matrix}
 }
 \description{
-Function lagm which return a lagged matrix
-}
-\examples{
-
- data(exampledata)
- lagm(as.matrix(exampledata$y),2)
+Function lagm: lagged matrix
 }
 \keyword{internal}

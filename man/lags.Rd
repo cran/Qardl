@@ -2,25 +2,21 @@
 % Please edit documentation in R/zzz.R
 \name{lags}
 \alias{lags}
-\title{Function lags which return a lagged matrix}
+\title{Function lags: lagged matrix}
 \usage{
 lags(x, k = 1)
 }
 \arguments{
 \item{x}{is a matrix}
 
-\item{k}{the number of lags}
-}
-\value{
-A lagged matrix
+\item{k}{the number of lags
+
+#load data
+data(exampledata)
+m=as.matrix(exampledata$y)
+lags(m,k=2)}
 }
 \description{
-Function lags which return a lagged matrix
-}
-\examples{
-
- data(exampledata)
-lags(exampledata$y,2)
-
+Function lags: lagged matrix
 }
 \keyword{internal}

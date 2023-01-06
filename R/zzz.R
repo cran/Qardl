@@ -1,15 +1,18 @@
-#' Function lagm which return a lagged matrix
-#'@param m is a matrix
+
+
+
+
+#' Function lagm: lagged matrix
+#'@param x is a matrix
 #'@param nLags the number of lags
 #'
-#'@examples
-#'
-#'  data(exampledata)
-#'  lagm(as.matrix(exampledata$y),2)
-#'@return A lagged matrix
+#'#load data
+#'data(exampledata)
+#'m=as.matrix(exampledata$y)
+#'lagm(m,2)
 #'
 #'@keywords internal
-#'
+#'@export
 
 lagm <- function(m, nLags) {
   # JM: This code is redundant. More than 2 arguments will cause an error
@@ -55,16 +58,17 @@ lagm <- function(m, nLags) {
 }
 
 
-#' Function nlagm return a  lagged matrix
+#' Function nlagm: lagged matrix
 #'@param x is a matrix
 #'@param nlags the number of lags
-#'@examples
 #'
-#'  data(exampledata)
-#'  nlagm(as.matrix(exampledata$y),2)
+#'#load data
+#'data(exampledata)
+#'m=as.matrix(exampledata$y)
+#'nlagm(m,2)
 #'
-#'@return A lagged matrix
 #'@keywords internal
+#'@export
 nlagm=function(x,nlags){
   if(nlags==0){
     mlag=as.matrix(x)
@@ -75,16 +79,17 @@ nlagm=function(x,nlags){
 
   mlag
 }
-#' Function nlagm1 which return a lagged matrix
+#' Function nlagm1: lagged matrix
 #'@param x is a matrix
 #'@param nlags the number of lags
-#'@examples
 #'
-#' data(exampledata)
-#' nlagm1(as.matrix(exampledata$y),2)
+#'#load data
+#'data(exampledata)
+#'m=as.matrix(exampledata$y)
+#'nlagm1(m,2)
 #'
-#'@return A lagged matrix
 #'@keywords internal
+#'@export
 nlagm1=function(x,nlags){
   if(nlags==0){
     mlag=as.matrix(x)
@@ -96,16 +101,17 @@ nlagm1=function(x,nlags){
 }
 
 
-#' Function lags which return a lagged matrix
+#' Function lags: lagged matrix
 #'@param x is a matrix
 #'@param k the number of lags
-#'@examples
 #'
-#'  data(exampledata)
-#' lags(exampledata$y,2)
+#'#load data
+#'data(exampledata)
+#'m=as.matrix(exampledata$y)
+#'lags(m,k=2)
 #'
-#'@return A lagged matrix
 #'@keywords internal
+#'@export
 lags <- function(x, k=1) {
   i<-is.vector(x)
   if(is.vector(x)) x<-matrix(x) else x<-matrix(x,nrow(x))
@@ -118,17 +124,17 @@ lags <- function(x, k=1) {
   if(i) x[1:length(x)] else x
 }
 
-#' Function mlags which return a lagged matrix
+#' Function mlags: lagged matrix
 #'@param x is a matrix
 #'@param nlags the number of lags
-#'@examples
 #'
-#'  data(exampledata)
-#'  mlags(as.matrix(exampledata$y),2)
+#'#load data
+#'data(exampledata)
+#'m=as.matrix(exampledata$y)
+#'mlags(m,2)
 #'
-#'@return  A lagged matrix
 #'@keywords internal
-
+#'@export
 mlags=function(x,nlags){
   if(nlags==0){
     mlag=as.matrix(x)
@@ -140,4 +146,81 @@ mlags=function(x,nlags){
   mlag
 }
 
+#' Function BIC
+#'@param f lm object
+#'
+#'
+#'@keywords internal
+#'@export
+BICC <- function(f) {
+  sample.size<-f$df + length(f$coeff)
+  bic<-log(sum(residuals(f)^2)/sample.size)+(length(f$coeff)/sample.size)*log(sample.size)
+  bic
 
+}
+
+
+#' Function matsplitter
+#'@param M matrix
+#'@param r matrix rows
+#'@param c matrix columns
+#'
+#'aaa=matrix(c(seq(50)),25,2)
+#'matsplitter(aaa,5,2)
+#'
+#'@keywords internal
+#'@export
+matsplitter<-function(M, r, c) {
+  rg <- (row(M)-1)%/%r+1
+  cg <- (col(M)-1)%/%c+1
+  rci <- (rg-1)*max(cg) + cg
+  N <- prod(dim(M))/r/c
+  cv <- unlist(lapply(1:N, function(x) M[rci==x]))
+  dim(cv)<-c(r,c,N)
+  cv
+}
+
+#' Function wtelslr beta
+#'@param cof the estimated long-run parameter by qardl
+#'@param covar estimated covariance matrix
+#'@param rca R matrix in the null hypothesis
+#'@param rsm r matrix in the null hypothesis
+#'@param data the same data set used for qardl
+#'
+#'#'data(exampledata)
+#'hyp=hyptest(y~z1+z2,exampledata,maxlag=7,tau=c(0.25,0.5,0.75))
+#'wlr=wtestlr(hyp$bigbt,hyp$lrvcov3, hyp$ca1,hyp$sm1,exampledata)
+#'wlr
+#'@keywords internal
+#'@export
+wtestlr=function(cof,covar,rca,rsm,data){
+  nn = nrow(data)
+  wtlrb1 = (nn-1)^2*t(rca%*%cof-rsm)%*%ginv(rca%*%covar%*%t(rca))%*%(rca%*%cof-rsm)
+  rnkl = ncol(rca)
+  pval=pchisq(wtlrb1,rnkl)
+  out= list(wtlrb1=wtlrb1,pval=pval)
+  return(out)
+}
+
+
+#' Function wtelslsr gamma and phi
+#'@param cof the estimated short-run parameter by qardl
+#'@param covar estimated covariance matrix
+#'@param rca R matrix in the null hypothesis
+#'@param rsm r matrix in the null hypothesis
+#'@param data the same data set used for qardl
+#'
+#'data(exampledata)
+#'hyp=hyptest(y~z1+z2,exampledata,maxlag=7,tau=c(0.25,0.5,0.75))
+#'wsrg=wtestlsr(hyp$bigdam, hyp$bigff, hyp$ca1, hyp$sm1, exampledata)
+#'wsrg
+#'@keywords internal
+#'@export
+wtestlsr=function(cof,covar,rca,rsm,data){
+  nn = nrow(data)
+  wtlrb1 = (nn-1)*t(rca%*%cof-rsm)%*%ginv(rca%*%covar%*%t(rca))%*%(rca%*%cof-rsm)
+  rnkl = nrow(rca)
+  pval=pchisq(wtlrb1,rnkl)
+  out= list(wtlrb1=wtlrb1,pval=pval)
+  return(out)
+}

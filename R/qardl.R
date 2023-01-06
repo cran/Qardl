@@ -5,7 +5,7 @@
 #'@param maxlag maximum lag number
 #'@param tau the quantile(s) to be estimated, this is generally a number strictly between 0 and 1
 #'
-#'@importFrom stats lm pchisq as.formula model.frame model.matrix model.response na.omit sd update vcov residuals coef nobs pf pnorm df.residual formula na.exclude
+#'@importFrom stats lm pchisq BIC as.formula model.frame model.matrix model.response na.omit sd update vcov residuals coef nobs pf pnorm df.residual formula na.exclude
 #'@importFrom dplyr sapply
 #'@importFrom pbapply pblapply
 #'@importFrom quantreg rq
@@ -26,7 +26,6 @@
 #'
 #'@export
 
-
 qardl<-function(formula,data,maxlag=4,tau=NULL){
   #***************************************
   #* Dr.Taha Zaghdoudi
@@ -39,7 +38,10 @@ qardl<-function(formula,data,maxlag=4,tau=NULL){
   #***********************************
   #* Matlab verison of Sangwoo Park (2020)
   #* ************************************
-
+  #formula= ltotren~lgeop+lcpu
+  #data= dusa
+  #maxlag=7
+  #tau=0.25
   aa<-unlist(as.character(formula))
   lhs   <- aa[[2]]
   core  <- aa[[3]]
@@ -69,27 +71,32 @@ qardl<-function(formula,data,maxlag=4,tau=NULL){
     pd[i]= grid0[i,2]-1
   }
   grid=cbind(grid0,pd)
+
   ss=pblapply(1:nrow(grid0) ,function(i) lm(y~nlagm1(y,grid[i,1])+lags(xx,grid[i,2])+mlags(dx,grid[i,3])))
-  ak=sapply(1:nrow(grid0),function(x) BIC(ss[[x]]))
+  ak=sapply(1:nrow(grid0),function(x) BICC(ss[[x]]))
 
   cii=as.matrix(ak)
   np=which.min(cii)
   pg=grid[np,]
+
   lay1=nlagm1(y,pg[,1])
   lagx=as.matrix(lags(xx,pg[,2]))
   colnames(lagx)=paste("L",colnames(xx),sep = ".")
   lagdx=mlags(dx,pg[,3])
-  rhnams<-c("Const",colnames(lay1),colnames(lagx), colnames(lagdx))
+  rhnams<-c("(Intercept)",colnames(lay1),colnames(lagx), colnames(lagdx))
   fits= rq(y~lay1+lagx+lagdx,tau=tau )
 
   #fits=rq(y~nlagm1(y,2)+lags(xx,1)+mlags(dx,0), tau=tau)
 
   #*******************************************
   #* tout ce qui est au dessus est correct rest le long run
-
   names(fits$coefficients)<-rhnams
   sels<-summary(fits,se ="iid" )#"boot", bsmethod= "xy")
+  #for(i in 1:length(tau)){
+ # rownames(sels[[i]]$coefficients)<-rhnams
+ # }
   rownames(sels$coefficients)<-rhnams
+
 
   errors=sels$residuals
   p=pg[[1]]
@@ -141,7 +148,7 @@ qardl<-function(formula,data,maxlag=4,tau=NULL){
 
     }
     tilw=tw[p:(obs-1),]
-    lll = (crossprod(kk)-crossprod(kk,tilw)%*%ginv(crossprod(tilw))%*%crossprod(tilw,kk))/(obs-p)
+    #lll = (crossprod(kk)-crossprod(kk,tilw)%*%ginv(crossprod(tilw))%*%crossprod(tilw,kk))/(obs-p)
   }else{
     xxi=xx[(q+1):obs,]
     wi=dx[(q+1):obs,]
@@ -155,32 +162,12 @@ qardl<-function(formula,data,maxlag=4,tau=NULL){
     }
 
     tilw=tw[(q:obs-1),]
-    lll = (crossprod(kk) -crossprod(kk,tilw)%*%ginv(crossprod(tilw))%*%crossprod(tilw,kk))/(obs-q)
+    #lll = (crossprod(kk) -crossprod(kk,tilw)%*%ginv(crossprod(tilw))%*%crossprod(tilw,kk))/(obs-q)
   }
 
 
-  psu2=matrix(c(0),2,1)
-  psu2[1,1]=tau
-  psu2[2,1]=tau
-  cc=(min(psu2,1)-tau^2)/fh^2
-
-  psu=NULL
-  bigpi=matrix(c(0),p,p)
-
-  # psu = ginv(lll[(jj-1)*p+1:jj*p,(jj-1)*p+1:jj*p])%*%lll[(jj-1)*p+1:jj*p,(ii-1)*p+1:ii*p]%*%ginv(lll[(ii-1)*p+1:ii*p,(ii-1)*p+1:ii*p])
-  psu3 = ginv(lll[1:p,1:p])%*%lll[1:p,1:p]%*%ginv(lll[1:p,1:p])
-  bigpi[1:p,1:p] = cc*psu3
-
-  #****************************************
-  #*testing short-run parameters: gamma
-  #****************************************
-  beta=coeff[,1]
-  midgam = beta[(p+2):(2+(q*k))]
-  midbt= beta[(p+2):(2+(q*k))]/(1-sum(beta[2:(p+1)]))
-  bilam= midbt*matrix(c(1),p,p)
-  bigff = bilam%*%bigpi%*%t(bilam)
-
-  out=list(sels=sels,lres=lres)
+  out=list(sels=sels,lres=lres,fits=fits, lrvcov=lrvcov, mm=mm, qq=qq, hb=hb, fh=fh,
+           bb=bb,p=p,q=q, kk=kk, tw=tw, tilw=tilw, obs=obs)
   class(out) <- "qardl"
 
   return(out)

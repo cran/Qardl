@@ -2,25 +2,21 @@
 % Please edit documentation in R/zzz.R
 \name{mlags}
 \alias{mlags}
-\title{Function mlags which return a lagged matrix}
+\title{Function mlags: lagged matrix}
 \usage{
 mlags(x, nlags)
 }
 \arguments{
 \item{x}{is a matrix}
 
-\item{nlags}{the number of lags}
-}
-\value{
-A lagged matrix
+\item{nlags}{the number of lags
+
+#load data
+data(exampledata)
+m=as.matrix(exampledata$y)
+mlags(m,2)}
 }
 \description{
-Function mlags which return a lagged matrix
-}
-\examples{
-
- data(exampledata)
- mlags(as.matrix(exampledata$y),2)
-
+Function mlags: lagged matrix
 }
 \keyword{internal}
